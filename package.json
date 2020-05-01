@@ -14,8 +14,11 @@
   "dependencies": {
     "apollo-boost": "^0.4.7",
     "apollo-server-express": "^2.12.0",
+    "bcrypt": "^4.0.1",
+    "chalk": "^4.0.0",
     "compression": "^1.7.1",
     "graphql-tag": "^2.10.3",
+    "mongoose": "^5.9.11",
     "node-fetch": "^2.6.0",
     "polka": "next",
     "sirv": "^0.4.0",
