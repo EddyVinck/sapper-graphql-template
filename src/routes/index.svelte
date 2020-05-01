@@ -28,10 +28,12 @@
   // export let cache;
 
   let response = {
-    data: { me: { name: "undefined", avatar: "graphql.png" } }
+    data: { me: { name: "undefined", avatar: "graphql.png" } },
+    loading: true
   };
 
   $: image = response.data.me.avatar;
+  $: text = response.loading ? "Loading..." : "Great success!";
 
   // console.log(cache);
   // restore(client, ME, cache.data);
@@ -92,7 +94,7 @@
   <title>Sapper GraphQL template</title>
 </svelte:head>
 
-<h1>Great success!</h1>
+<h1>{text}</h1>
 
 <p>GraphQL response:</p>
 <pre>{JSON.stringify(response, 0, 2)}</pre>
