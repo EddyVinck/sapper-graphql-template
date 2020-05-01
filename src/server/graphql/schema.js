@@ -6,5 +6,6 @@ export const typeDefs = gql`
   }
   type User {
     email: String!
+    avatar: String!
   }
 `;
