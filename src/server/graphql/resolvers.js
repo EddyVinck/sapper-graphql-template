@@ -8,14 +8,22 @@ export const resolvers = {
         avatar: "great-success.png",
       };
     },
-    posts: (_root, _args, _ctx, _info) => {
+    posts: () => {
       return posts;
     },
-    post: (_root, _args, _ctx, _info) => {
-      return {
-        email: "borat@email.gql",
-        avatar: "great-success.png",
-      };
+    post: (_, { input }) => {
+      const key = input.id ? "id" : input.slug ? "slug" : false;
+      if (!key) {
+        throw new Error(
+          "Slug or ID required. Received invalid PostInput: " +
+            JSON.stringify(input)
+        );
+      }
+      const post = posts.find((p) => p[key] === input[key]);
+      if (post) {
+        return post;
+      }
+      throw new Error(`No post found with "${key}" of "${input[key]}"`);
     },
   },
 };

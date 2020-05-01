@@ -1,24 +1,50 @@
 <script context="module">
-	export async function preload({ params, query }) {
-		// the `slug` parameter is available because
-		// this file is called [slug].svelte
-		const res = await this.fetch(`blog/${params.slug}.json`);
-		const data = await res.json();
+  import { client } from "../../utils/data.js";
+  import gql from "graphql-tag";
 
-		if (res.status === 200) {
-			return { post: data };
-		} else {
-			this.error(res.status, data.message);
-		}
-	}
+  const POST = gql`
+    query GET_POST($input: PostInput!) {
+      post(input: $input) {
+        id
+        title
+        slug
+        html
+      }
+    }
+  `;
+
+  export async function preload({ params, query }) {
+    console.log("preloading post");
+    return {
+      cache: await client.query({
+        query: POST,
+        variables: {
+          input: {
+            slug: params.slug
+          }
+        }
+      })
+    };
+  }
 </script>
 
 <script>
-	export let post;
+  import { onMount } from "svelte";
+  import { setClient, restore, query } from "svelte-apollo";
+  export let cache;
+  restore(client, POST, cache.data);
+  onMount(() => {
+    setClient(client);
+  });
+  let post = query(client, { query: POST });
+
+  // This is necessary to use the data outside an #await block
+  // You cannot use svelte:head inside an #await block, so this is a workaround.
+  let postResponse = $post;
 </script>
 
 <style>
-	/*
+  /*
 		By default, CSS is locally scoped to the component,
 		and any unused styles are dead-code-eliminated.
 		In this page, Svelte can't know which elements are
@@ -26,39 +52,44 @@
 		so we have to use the :global(...) modifier to target
 		all elements inside .content
 	*/
-	.content :global(h2) {
-		font-size: 1.4em;
-		font-weight: 500;
-	}
+  .content :global(h2) {
+    font-size: 1.4em;
+    font-weight: 500;
+  }
 
-	.content :global(pre) {
-		background-color: #f9f9f9;
-		box-shadow: inset 1px 1px 5px rgba(0,0,0,0.05);
-		padding: 0.5em;
-		border-radius: 2px;
-		overflow-x: auto;
-	}
+  .content :global(pre) {
+    background-color: #f9f9f9;
+    box-shadow: inset 1px 1px 5px rgba(0, 0, 0, 0.05);
+    padding: 0.5em;
+    border-radius: 2px;
+    overflow-x: auto;
+  }
 
-	.content :global(pre) :global(code) {
-		background-color: transparent;
-		padding: 0;
-	}
+  .content :global(pre) :global(code) {
+    background-color: transparent;
+    padding: 0;
+  }
 
-	.content :global(ul) {
-		line-height: 1.5;
-	}
+  .content :global(ul) {
+    line-height: 1.5;
+  }
 
-	.content :global(li) {
-		margin: 0 0 0.5em 0;
-	}
+  .content :global(li) {
+    margin: 0 0 0.5em 0;
+  }
 </style>
 
 <svelte:head>
-	<title>{post.title}</title>
+  <title>{postResponse.data.post.title}</title>
 </svelte:head>
 
-<h1>{post.title}</h1>
-
-<div class='content'>
-	{@html post.html}
-</div>
+{#await $post}
+  <p>Loading...</p>
+{:then response}
+  <h1>{response.data.post.title}</h1>
+  <div class="content">
+    {@html response.data.post.html}
+  </div>
+{:catch}
+  <p>Could not load post right now. Try again later.</p>
+{/await}

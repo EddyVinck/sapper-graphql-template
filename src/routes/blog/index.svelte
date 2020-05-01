@@ -8,7 +8,6 @@
         id
         title
         slug
-        html
       }
     }
   `;
@@ -23,9 +22,13 @@
 </script>
 
 <script>
+  import { onMount } from "svelte";
   import { setClient, restore, query } from "svelte-apollo";
   export let cache;
   restore(client, POSTS, cache.data);
+  onMount(() => {
+    setClient(client);
+  });
   let posts = query(client, { query: POSTS });
 </script>
 
