@@ -112,9 +112,13 @@
   </figure>
   <p>GraphQL response:</p>
   <div class="pre-wrapper">
-
     <pre>{JSON.stringify(result, 0, 2)}</pre>
   </div>
+  <p>
+    You can also see the GraphQL in action on the
+    <a href="/graphql" target="_blank" rel="noopener">GraphQL Playground</a>
+    .
+  </p>
 {:catch error}
   <pre>{error}</pre>
 {/await}

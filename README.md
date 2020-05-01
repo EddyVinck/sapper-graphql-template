@@ -16,8 +16,9 @@ Thanks for checking it out!
 
 ### What's included?
 
-- apollo-server-express ([link](https://github.com/apollographql/apollo-server/tree/master/packages/apollo-server-express))
 - svelte-apollo ([link](https://github.com/timhall/svelte-apollo))
+- apollo-server-express ([link](https://github.com/apollographql/apollo-server/tree/master/packages/apollo-server-express))
+- GraphQL Playground: go to http://localhost:3000/graphql.
 
 ## Getting started
 
