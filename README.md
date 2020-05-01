@@ -14,6 +14,11 @@ Thanks for checking it out!
 
 \- Eddy
 
+### What's included?
+
+- apollo-server-express ([link](https://github.com/apollographql/apollo-server/tree/master/packages/apollo-server-express))
+- svelte-apollo ([link](https://github.com/timhall/svelte-apollo))
+
 ## Getting started
 
 ### Using `degit`
@@ -21,7 +26,7 @@ Thanks for checking it out!
 [`degit`](https://github.com/Rich-Harris/degit) is a scaffolding tool that lets you create a directory from a branch in a repository. Use either the `rollup` or `webpack` branch in `sapper-template`:
 
 ```bash
-npx degit "eddyvinck/sapper-graphql-template" my-app
+npx degit eddyvinck/sapper-graphql-template my-app
 ```
 
 ### Running the project
