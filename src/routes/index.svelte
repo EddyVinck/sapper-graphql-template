@@ -1,5 +1,5 @@
 <script context="module">
-  // this only runs on the server
+  // A context="module" script only runs on the server
   import { client } from "../utils/data.js";
   import gql from "graphql-tag";
 
@@ -13,11 +13,10 @@
   `;
 
   export async function preload() {
-    console.log("trying to preload");
     return {
-      // cache: await client.query({
-      //   query: ME
-      // })
+      cache: await client.query({
+        query: ME
+      })
     };
   }
 </script>
@@ -25,29 +24,22 @@
 <script>
   import { onMount } from "svelte";
   import { setClient, restore, query } from "svelte-apollo";
-  // export let cache;
+  export let cache; // this matches the return value of `preload` above
+  restore(client, ME, cache.data);
 
-  let response = {
-    data: { me: { name: "undefined", avatar: "graphql.png" } },
-    loading: true
-  };
+  let meQuery = query(client, { query: ME });
 
-  $: image = response.data.me.avatar;
-  $: text = response.loading ? "Loading..." : "Great success!";
-
-  // console.log(cache);
-  // restore(client, ME, cache.data);
-  onMount(async () => {
-    setClient(client);
-
-    try {
-      const data = await client.query({ query: ME });
-      response = data;
-      console.log(data);
-    } catch (error) {
-      console.error("oh no", error);
-    }
+  // You have access to the query result in the script like this:
+  console.log("<script> $meQuery:", $meQuery);
+  onMount(() => {
+    console.log("onMount $meQuery:", $meQuery);
   });
+
+  $: image =
+    meQuery && meQuery.data && meQuery.data.me && meQuery.data.me.avatar;
+  $: loading = meQuery.loading;
+  $: text = loading ? "Loading..." : "Great success!";
+  $: altText = loading ? "Loading Borat..." : "Borat";
 </script>
 
 <style>
@@ -72,20 +64,29 @@
   img {
     width: 100%;
     max-width: 400px;
-    margin: 0 0 1em 0;
+    margin: 1em 0 0 0;
   }
 
   p {
     margin: 1em auto;
   }
+  .pre-wrapper {
+    display: flex;
+    justify-content: center;
+  }
   pre {
-    padding-left: 1rem;
-    border-left: 2px solid #d64292;
+    display: inline-block;
+    padding: 0.5rem 0 0.5rem 1rem;
+    border-left: 4px solid #d64292;
+    font-size: 11px;
   }
 
   @media (min-width: 480px) {
     h1 {
       font-size: 4em;
+    }
+    pre {
+      font-size: 14px;
     }
   }
 </style>
@@ -96,16 +97,36 @@
 
 <h1>{text}</h1>
 
-<p>GraphQL response:</p>
-<pre>{JSON.stringify(response, 0, 2)}</pre>
+<!-- Take note of the "$" here, it's important! -->
+{#await $meQuery}
+  <figure>
+    <figcaption>Loading...</figcaption>
+    <img alt="Loading Borat..." src="graphql.png" />
+    <p>this should not appear if everything goes right</p>
+  </figure>
+{:then result}
+  <figure>
+    <figcaption>HIGH FIVE!</figcaption>
+    <img alt="Borat!" src={result.data.me.avatar} />
+  </figure>
+  <p>GraphQL response:</p>
+  <div class="pre-wrapper">
 
-<figure>
-  <img alt="Borat" src={image} />
-  <figcaption>HIGH FIVE!</figcaption>
-</figure>
+    <pre>{JSON.stringify(result, 0, 2)}</pre>
+  </div>
+{:catch error}
+  <pre>{error}</pre>
+{/await}
 
 <p>
   <strong>
     Try editing this file (src/routes/index.svelte) to test live reloading.
+  </strong>
+</p>
+<p>
+  <strong>
+    To verify that server-side rendering works view the source of this page
+    (CTRL+U or CMD+U). If the &lt;figcaption&gt; shows "loading..." instead of
+    "HIGH FIVE!" it did not work.
   </strong>
 </p>
