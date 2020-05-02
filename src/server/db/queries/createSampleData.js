@@ -76,7 +76,8 @@ const createSamplePosts = async (users) => {
     ...post,
     author: admin._id,
   }));
-  return await Post.create([...sampleUserPosts, ...sampleAdminPosts]);
+  const posts = await Post.create([...sampleUserPosts, ...sampleAdminPosts]);
+  console.log({ posts });
 };
 
 async function getSampleUsers() {
@@ -86,7 +87,7 @@ async function getSampleUsers() {
     },
   })
     .populate("post")
-    .execPopulate();
+    .exec();
   return users;
 }
 const usersFoundMessage =
