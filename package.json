@@ -22,6 +22,7 @@
     "node-fetch": "^2.6.0",
     "polka": "next",
     "sirv": "^0.4.0",
+    "slug": "^2.1.1",
     "svelte-apollo": "^0.3.0"
   },
   "devDependencies": {

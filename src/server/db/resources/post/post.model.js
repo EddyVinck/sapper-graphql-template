@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import slug from "slug";
 
 const postSchema = new mongoose.Schema(
   {
@@ -6,13 +7,18 @@ const postSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    content: {
+    slug: {
+      type: String,
+      required: true,
+    },
+    html: {
       type: String,
       required: true,
       maxlength: 3000,
     },
     isFeatured: {
       type: Boolean,
+      required: true,
       default: false,
     },
     author: {
@@ -23,6 +29,7 @@ const postSchema = new mongoose.Schema(
     // For "soft deleting"
     isDeleted: {
       type: Boolean,
+      required: true,
       default: false,
     },
   },
@@ -32,7 +39,17 @@ const postSchema = new mongoose.Schema(
 // using a good ol' function so we can utilize `this`
 // `this` refers to the instance of a post.
 postSchema.virtual("contentLength").get(function () {
-  return this.content.length;
+  return this.html.length;
+});
+
+postSchema.pre("validate", function (next) {
+  // TODO: validate that the provided slug is usable
+  if (!this.slug) {
+    this.slug = slug(this.title, {
+      lower: true,
+    });
+  }
+  next();
 });
 
 // Multiple posts with the same title for the same author not allowed

@@ -28,13 +28,13 @@ const sampleAdmin = {
 let sampleUserPosts = [
   {
     title: "Sapper is Powered by Svelte",
-    content: `
+    html: `
 <p>Sapper is an application framework powered by Svelte — build bigger apps with a smaller footprint</p>
 `,
   },
   {
     title: "Best of both worlds",
-    content: `
+    html: `
 <blockquote>
   <p>Sapper is in early development, and some things may change before we hit version 1.0. This document is a work-in-progress. If you get stuck, reach out for help in the <a href="https://svelte.dev/chat" target="_blank">Discord chatroom</a>.</p>
   <p>See the <a href="migrating">migration guides</a> for help upgrading from older versions.</p>
@@ -59,7 +59,7 @@ let sampleUserPosts = [
 let sampleAdminPosts = [
   {
     title: "Admins are the best",
-    content: "<p>It's true.</p>",
+    html: "<p>It's true.</p>",
     isFeatured: true,
   },
 ];
