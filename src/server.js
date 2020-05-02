@@ -6,9 +6,10 @@ import chalk from "chalk";
 import { typeDefs, resolvers } from "./server/graphql";
 import { ApolloServer } from "apollo-server-express";
 import { connect, dbUrl } from "./server/db";
+import { createSampleDataIfDbEmpty } from "./server/db/queries/createSampleData";
 
 const { PORT, NODE_ENV } = process.env;
-const dev = NODE_ENV === "development";
+const IS_DEV = NODE_ENV === "development";
 
 const startServer = async () => {
   const app = polka(); // You can also use Express
@@ -19,7 +20,12 @@ const startServer = async () => {
     connection = await connect(dbUrl);
     console.log(chalk.green("✔ Database connected!"));
   } catch (error) {
-    console.error("could not connect to database.");
+    console.error("❌ could not connect to database.");
+    console.error("Reason: " + error);
+  }
+
+  if (IS_DEV && connection) {
+    createSampleDataIfDbEmpty();
   }
 
   // GraphQL
@@ -36,7 +42,7 @@ const startServer = async () => {
   app
     .use(
       compression({ threshold: 0 }),
-      sirv("static", { dev }),
+      sirv("static", { dev: IS_DEV }),
       sapper.middleware({ ignore: "/graphql" })
     )
     .listen(PORT, (err) => {

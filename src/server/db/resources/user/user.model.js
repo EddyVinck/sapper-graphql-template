@@ -3,11 +3,7 @@ import bcrypt from "bcrypt";
 
 const userSchema = new mongoose.Schema(
   {
-    id: {
-      type: String,
-      required: true,
-      unique: true,
-    },
+    // no `id` because mongo adds a _id field by default
     email: {
       type: String,
       required: true,
@@ -17,6 +13,46 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
+    },
+    posts: [
+      {
+        type: mongoose.SchemaTypes.ObjectId,
+        ref: "post", // has to be populated with mongoose
+        required: false,
+      },
+    ],
+    // These could be in a separate schema
+    // This approach is fairly straightforward since it doesn't utilize roles.
+    permissions: {
+      createPost: {
+        type: Boolean,
+        default: true,
+        required: true,
+      },
+      // edit the posts that this user posted themselves
+      editOwnPost: {
+        type: Boolean,
+        default: true,
+        required: true,
+      },
+      // edit other people's posts too
+      editAnyPost: {
+        type: Boolean,
+        default: false,
+        required: true,
+      },
+      // delete the posts that this user posted themselves
+      deleteOwnPost: {
+        type: Boolean,
+        default: true,
+        required: true,
+      },
+      // delete other people's posts too
+      deleteAnyPost: {
+        type: Boolean,
+        default: false,
+        required: true,
+      },
     },
   },
   {
@@ -39,10 +75,10 @@ userSchema.pre("save", function (next) {
   });
 });
 
-userSchema.methods.checkPassword = function (password) {
+userSchema.methods.checkPassword = function (enteredPassword) {
   const passwordHash = this.password;
   return new Promise((resolve, reject) => {
-    bcrypt.compare(password, passwordHash, (err, same) => {
+    bcrypt.compare(enteredPassword, passwordHash, (err, same) => {
       if (err) {
         return reject(err);
       }
