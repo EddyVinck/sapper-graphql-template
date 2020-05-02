@@ -65,7 +65,7 @@ let sampleAdminPosts = [
 ];
 
 const createSamplePosts = async (users) => {
-  console.log("🛠   Creating a few posts...");
+  console.log("🛠 Creating a few posts...");
   const user = users.find((u) => u.email === sampleUser.email);
   const admin = users.find((u) => u.email === sampleAdmin.email);
   sampleUserPosts = sampleUserPosts.map((post) => ({
@@ -77,7 +77,6 @@ const createSamplePosts = async (users) => {
     author: admin._id,
   }));
   const posts = await Post.create([...sampleUserPosts, ...sampleAdminPosts]);
-  console.log({ posts });
 };
 
 async function getSampleUsers() {
@@ -85,64 +84,50 @@ async function getSampleUsers() {
     email: {
       $in: [sampleUser.email, sampleAdmin.email],
     },
-  })
-    .populate("post")
-    .exec();
+  }).exec();
+
   return users;
 }
 const usersFoundMessage =
-  '⭐  You can log in with "user@svelte.dev" or "admin@svelte.dev". Their passwords are "password".';
+  '⭐ You can log in with "user@svelte.dev" or "admin@svelte.dev". Their passwords are "password".';
 
 // ! Only run this in development and when the database is connected !
 export async function createSampleDataIfDbEmpty() {
   try {
-    console.log("🔎  Checking if database empty...");
+    console.log("🔎 Checking if database empty...");
     let sampleAccounts = await getSampleUsers();
 
     if (sampleAccounts.length > 0) {
-      console.log("✔   Users found!");
+      console.log("✔ Example users found!");
       console.log(usersFoundMessage);
 
-      console.log({ sampleAccounts });
+      const posts = await Post.find({
+        author: {
+          $in: sampleAccounts.map((acc) => acc._id),
+        },
+      });
 
-      // Check if those users have any posts
-      const foundPosts = sampleAccounts.reduce((prev, user) => {
-        // don't bother with the content, it's too long.
-        const _posts = user.posts.map((post) => ({
-          author: post.author,
-          title: post.title,
-          isFeatured: post.isFeatured,
-        }));
-        return prev.concat(_posts);
-      }, []);
-
-      console.log({ foundPosts });
-
-      if (foundPosts.length > 0) {
-        console.log("🔎  Posts found!");
-        console.log({ posts: foundPosts });
+      if (posts.length > 0) {
+        console.log(`✔ ${posts.length} example posts found!`);
         // if  the found users have any posts, stop running this function
         return;
       }
       await createSamplePosts(sampleAccounts);
-      console.log("✔   Posts created!");
+      console.log("✔ Posts created!");
 
       return;
     }
 
     // If no users present, create a few users
-    console.log("🛠   Creating a few users...");
+    console.log("🛠 Creating a few users...");
     await User.create([sampleUser, sampleAdmin]);
     sampleAccounts = await getSampleUsers();
-    console.log("✔   created sample user and admin!");
+    console.log("✔ created sample user and admin!");
     console.log(usersFoundMessage);
     const posts = await createSamplePosts(sampleAccounts);
-    console.log("✔   Posts created!");
-    console.log({ posts });
+    console.log("✔ Posts created!");
 
-    sampleAccounts = await getSampleUsers();
-    console.log(sampleAccounts);
-    return console.log("✔   createSampleDataIfDbEmpty done!");
+    return console.log("✔ createSampleDataIfDbEmpty done!");
   } catch (error) {
     console.error(
       "Something went wrong in `createSampleDataIfDbEmpty`: ",

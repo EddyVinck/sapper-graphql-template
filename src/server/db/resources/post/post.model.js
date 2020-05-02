@@ -18,7 +18,7 @@ const postSchema = new mongoose.Schema(
     author: {
       type: mongoose.SchemaTypes.ObjectId,
       required: true,
-      ref: "user", // this has to be populated with mongoose
+      ref: "User", // this has to be populated with mongoose
     },
     // For "soft deleting"
     isDeleted: {
@@ -46,4 +46,4 @@ postSchema.index(
   }
 );
 
-export const Post = mongoose.model("post", postSchema);
+export const Post = mongoose.model("Post", postSchema);

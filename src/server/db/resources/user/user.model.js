@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
+import { Post } from "../post/post.model";
 
 const userSchema = new mongoose.Schema(
   {
@@ -14,13 +15,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    posts: [
-      {
-        type: mongoose.SchemaTypes.ObjectId,
-        ref: "post", // has to be populated with mongoose
-        required: false,
-      },
-    ],
     // These could be in a separate schema
     // This approach is fairly straightforward since it doesn't utilize roles.
     permissions: {
@@ -88,4 +82,4 @@ userSchema.methods.checkPassword = function (enteredPassword) {
   });
 };
 
-export const User = mongoose.model("user", userSchema);
+export const User = mongoose.model("User", userSchema);
