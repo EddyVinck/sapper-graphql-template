@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import slug from "slug";
+import { returnVirtuals } from "../../utils/returnVirtuals";
 
 const postSchema = new mongoose.Schema(
   {
@@ -36,7 +37,7 @@ const postSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// using a good ol' function so we can utilize `this`
+// using a good ol' function so we can utilize `this`.
 // `this` refers to the instance of a post.
 postSchema.virtual("contentLength").get(function () {
   return this.html.length;
@@ -62,5 +63,7 @@ postSchema.index(
     unique: true,
   }
 );
+
+returnVirtuals(postSchema);
 
 export const Post = mongoose.model("Post", postSchema);

@@ -1,12 +1,22 @@
 import { Post } from "../resources/post/post.model";
+import { User } from "../resources/user/user.model";
 
 const postByTitle = (title) => {
   return Post.findOne({ title }).exec();
 };
 
 // skip and limit are used for pagination
-const postsForAuthor = (userId, skip = 10, limit = 0) => {
+export const postsForAuthor = (userId, skip = 10, limit = 0) => {
   return Post.find({ author: userId }).skip(skip).limit(limit).exec();
+};
+
+export const getAuthorFromPost = async (postId) => {
+  const match = await Post.findById(postId)
+    .populate("author")
+    .select("author")
+    .exec();
+
+  return match.author;
 };
 
 const fullPostById = (id) => {

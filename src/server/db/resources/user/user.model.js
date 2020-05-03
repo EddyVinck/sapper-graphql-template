@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
-import { Post } from "../post/post.model";
+import { returnVirtuals } from "../../utils/returnVirtuals";
 
 const userSchema = new mongoose.Schema(
   {
@@ -14,6 +14,11 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
+    },
+    avatar: {
+      type: String,
+      required: true,
+      default: "https://placekitten.com/300/300",
     },
     // These could be in a separate schema
     // This approach is fairly straightforward since it doesn't utilize roles.
@@ -54,6 +59,11 @@ const userSchema = new mongoose.Schema(
   }
 );
 
+userSchema.pre("validate", function (next) {
+  // TODO: validate valid avatar
+  next();
+});
+
 userSchema.pre("save", function (next) {
   if (!this.isModified("password")) {
     return next();
@@ -81,5 +91,7 @@ userSchema.methods.checkPassword = function (enteredPassword) {
     });
   });
 };
+
+returnVirtuals(userSchema);
 
 export const User = mongoose.model("User", userSchema);

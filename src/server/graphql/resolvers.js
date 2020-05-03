@@ -1,17 +1,20 @@
-import posts from "../../routes/blog/_posts";
+import { Post } from "../db/resources/post/post.model";
+import { postsForAuthor, getAuthorFromPost } from "../db/queries/queries";
+import { User } from "../db/resources/user/user.model";
 
 export const resolvers = {
   Query: {
     me: (_root, _args, _ctx, _info) => {
+      // TODO: auth
       return {
         email: "borat@email.gql",
         avatar: "great-success.png",
       };
     },
-    posts: () => {
-      return posts;
+    user: async (_, { id }) => {
+      return await User.findById(id).exec();
     },
-    post: (_, { input }) => {
+    post: async (_, { input }) => {
       const key = input.id ? "id" : input.slug ? "slug" : false;
       if (!key) {
         throw new Error(
@@ -19,11 +22,28 @@ export const resolvers = {
             JSON.stringify(input)
         );
       }
-      const post = posts.find((p) => p[key] === input[key]);
+      const value = input[key];
+      const post = await Post.findOne({ [key]: value }).exec();
       if (post) {
         return post;
       }
       throw new Error(`No post found with "${key}" of "${input[key]}"`);
+    },
+    posts: async () => {
+      const posts = await Post.find({}).exec();
+      return posts;
+    },
+  },
+  User: {
+    posts: async (user) => {
+      const posts = await postsForAuthor(user.id);
+      return posts;
+    },
+  },
+  Post: {
+    author: async (post) => {
+      const author = getAuthorFromPost(post.id);
+      return author;
     },
   },
 };

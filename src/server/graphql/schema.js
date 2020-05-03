@@ -4,12 +4,14 @@ export const typeDefs = gql`
   type Query {
     me: User
     posts: [Post]!
+    user(id: ID!): User
     post(input: PostInput!): Post
   }
   type User {
     email: String!
     avatar: String!
     permissions: Permissions!
+    posts: [Post]!
   }
   type Permissions {
     createPost: Boolean!
