@@ -23,7 +23,7 @@ const fullPostById = (id) => {
   return Post.findById(id).populate("author").exec();
 };
 
-const allPostsSlim = (fieldsToSelect, skip = 10, limit = 0) => {
+const allPostsSlim = (fieldsToSelect, skip = 0, limit = 10) => {
   return Post.find({}).skip(skip).limit(limit).select(fieldsToSelect).exec();
 };
 
