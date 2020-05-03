@@ -6,7 +6,7 @@ const postByTitle = (title) => {
 };
 
 // skip and limit are used for pagination
-export const postsForAuthor = (userId, skip = 10, limit = 0) => {
+export const postsForAuthor = (userId, skip = 0, limit = 10) => {
   return Post.find({ author: userId }).skip(skip).limit(limit).exec();
 };
 
