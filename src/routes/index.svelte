@@ -29,8 +29,8 @@
 
   let meQuery = query(client, { query: ME });
 
-  // You have access to the query result in the script like this:
-  console.log("<script> $meQuery:", $meQuery);
+  // You have access to the query result in the script like this (with the $):
+  // console.log("<script> $meQuery:", $meQuery);
   onMount(() => {
     setClient(client);
     console.log("onMount $meQuery:", $meQuery);
