@@ -1,5 +1,6 @@
+import config from "config";
 export * from "./connect";
-const hostname = "localhost";
-const port = 27017; // default mongo port
-const dbName = "___svelteapp";
+const hostname = config.get("mongoDb.hostname");
+const port = config.get("mongoDb.port"); // default mongo port
+const dbName = config.get("mongoDb.dbName");
 export const dbUrl = `mongodb://${hostname}:${port}/${dbName}`;

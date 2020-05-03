@@ -69,6 +69,7 @@ userSchema.pre("save", function (next) {
     return next();
   }
 
+  // TODO: add salt from config
   bcrypt.hash(this.password, 8, (err, hash) => {
     if (err) {
       return next(err);

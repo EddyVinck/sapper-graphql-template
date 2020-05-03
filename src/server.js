@@ -6,7 +6,7 @@ import chalk from "chalk";
 import { typeDefs, resolvers } from "./server/graphql";
 import { ApolloServer } from "apollo-server-express";
 import { connect, dbUrl } from "./server/db";
-import { createSampleDataIfDbEmpty } from "./server/db/queries/createSampleData";
+import { createSampleDataIfDbEmpty } from "./server/db/utils/createSampleData";
 
 const { PORT, NODE_ENV } = process.env;
 const IS_DEV = NODE_ENV === "development";
