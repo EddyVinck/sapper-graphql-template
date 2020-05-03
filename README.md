@@ -16,10 +16,10 @@ Thanks for checking it out!
 
 ### What's included?
 
-- svelte-apollo ([link](https://github.com/timhall/svelte-apollo))
-- apollo-server-express ([link](https://github.com/apollographql/apollo-server/tree/master/packages/apollo-server-express))
+- [`svelte-apollo`](https://github.com/timhall/svelte-apollo)
+- [`apollo-server-express`](https://github.com/apollographql/apollo-server/tree/master/packages/apollo-server-express)
 - GraphQL Playground: go to http://localhost:3000/graphql.
-- MongoDB
+- MongoDB used with [`mongoose`](https://mongoosejs.com/)
 - Configuration with [`config`](https://github.com/lorenwest/node-config) configuration files in `/config/`
 
 ## Getting started
