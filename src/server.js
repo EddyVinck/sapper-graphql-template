@@ -7,6 +7,8 @@ import { typeDefs, resolvers } from "./server/graphql";
 import { ApolloServer } from "apollo-server-express";
 import { connect, dbUrl } from "./server/db";
 import { createSampleDataIfDbEmpty } from "./server/db/utils/createSampleData";
+import { getUserFromReqHeaders } from "./server/utils/auth";
+import { AuthenticationDirective } from "./server/graphql/directives";
 
 const { PORT, NODE_ENV } = process.env;
 const IS_DEV = NODE_ENV === "development";
@@ -15,16 +17,16 @@ const startServer = async () => {
   const app = polka(); // You can also use Express
 
   // Database
-  let connection;
+  let databaseConnection;
   try {
-    connection = await connect(dbUrl);
+    databaseConnection = await connect(dbUrl);
     console.log(chalk.green("✔ Database connected!"));
   } catch (error) {
     console.error("❌ could not connect to database.");
     console.error("Reason: " + error);
   }
 
-  if (IS_DEV && connection) {
+  if (IS_DEV && databaseConnection) {
     createSampleDataIfDbEmpty();
   }
 
@@ -32,8 +34,17 @@ const startServer = async () => {
   const server = new ApolloServer({
     typeDefs,
     resolvers,
-    context: ({ req, res }) => {
-      return { req, res, db: connection };
+    schemaDirectives: {
+      signin: AuthenticationDirective,
+    },
+    context: async ({ req, res }) => {
+      const context = { ...req, ...res, db: null, user: null };
+      if (databaseConnection) {
+        context.db = databaseConnection;
+        const user = await getUserFromReqHeaders(req.headers);
+        context.user = user;
+      }
+      return context;
     },
   });
   server.applyMiddleware({ app, path: "/graphql" });

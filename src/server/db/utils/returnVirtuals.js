@@ -6,4 +6,7 @@ export const returnVirtuals = (schema) => {
   schema.set("toJSON", {
     virtuals: true,
   });
+  schema.set("toObject", {
+    virtuals: true,
+  });
 };

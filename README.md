@@ -21,6 +21,7 @@ Thanks for checking it out!
 - GraphQL Playground: go to http://localhost:3000/graphql.
 - MongoDB used with [`mongoose`](https://mongoosejs.com/)
 - Configuration with [`config`](https://github.com/lorenwest/node-config) configuration files in `/config/`
+- Authentication via GraphQL (directives) based on JWT
 
 ## Getting started
 
