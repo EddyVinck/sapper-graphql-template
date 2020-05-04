@@ -4,5 +4,6 @@
     "hostname": "localhost",
     "port": 27017,
     "dbName": "___svelteapp"
-  }
+  },
+  "jwtSecret": "burrito"
 }
