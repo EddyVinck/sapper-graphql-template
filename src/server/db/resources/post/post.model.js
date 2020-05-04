@@ -50,6 +50,7 @@ postSchema.pre("validate", function (next) {
       lower: true,
     });
   }
+  // TODO: validate html
   next();
 });
 

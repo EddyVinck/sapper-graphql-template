@@ -64,6 +64,12 @@ export const resolvers = {
       const authUser = { token, user };
       return authUser;
     },
+    createPost: async (_, { input }, { user }) => {
+      const postDetails = { ...input, author: user.id };
+      const newPost = await Post.create(postDetails);
+
+      return newPost.toJSON();
+    },
     changePermissions: async (_, { input }) => {
       const { user: userId, ...permissions } = input;
       console.log({ userId, permissions });

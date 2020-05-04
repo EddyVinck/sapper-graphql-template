@@ -1,6 +1,8 @@
 import gql from "graphql-tag";
 
 export const typeDefs = gql`
+  directive @signin on FIELD_DEFINITION
+
   type Query {
     me: User!
     posts: [Post]!
@@ -10,7 +12,8 @@ export const typeDefs = gql`
   type Mutation {
     signIn(input: SignInInput!): AuthUser!
     signUp(input: SignUpInput!): AuthUser!
-    changePermissions(input: PermissionsInput): User
+    changePermissions(input: PermissionsInput): User # this won't work if you need to update multiple users at the same time
+    createPost(input: CreatePostInput): Post! @signin
   }
 
   type User {
@@ -62,6 +65,7 @@ export const typeDefs = gql`
     users: [OrganizationUser]!
   }
 
+  # TODO: support
   type Post {
     id: ID!
     title: String!
@@ -74,5 +78,10 @@ export const typeDefs = gql`
   input PostInput {
     id: ID
     slug: String
+  }
+  input CreatePostInput {
+    title: String!
+    html: String!
+    slug: String # can be generated on Mongoose pre-validate
   }
 `;

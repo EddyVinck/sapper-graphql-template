@@ -8,6 +8,7 @@ import { ApolloServer } from "apollo-server-express";
 import { connect, dbUrl } from "./server/db";
 import { createSampleDataIfDbEmpty } from "./server/db/utils/createSampleData";
 import { getUserFromReqHeaders } from "./server/utils/auth";
+import { AuthenticationDirective } from "./server/graphql/directives";
 
 const { PORT, NODE_ENV } = process.env;
 const IS_DEV = NODE_ENV === "development";
@@ -33,11 +34,14 @@ const startServer = async () => {
   const server = new ApolloServer({
     typeDefs,
     resolvers,
-    context: ({ req, res }) => {
-      const context = { ...req, ...res };
+    schemaDirectives: {
+      signin: AuthenticationDirective,
+    },
+    context: async ({ req, res }) => {
+      const context = { ...req, ...res, db: null, user: null };
       if (databaseConnection) {
         context.db = databaseConnection;
-        const user = getUserFromReqHeaders(req.headers);
+        const user = await getUserFromReqHeaders(req.headers);
         context.user = user;
       }
       return context;
