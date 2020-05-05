@@ -1,13 +1,58 @@
 <script>
+  import gql from "graphql-tag";
+  import { client } from "../utils/data.js";
+  let email = "user@svelte.dev";
+  let password = "password";
+  let errorMessage = "";
+
+  const SIGN_IN = gql`
+    mutation SIGN_IN_MUTATION($email: String!, $password: String!) {
+      signIn(input: { email: $email, password: $password }) {
+        token
+        user {
+          id
+          email
+        }
+      }
+    }
+  `;
+
+  function resetInputs() {
+    email = "";
+    password = "";
+  }
+
   async function handleSubmit(e) {
-    console.log(e);
+    try {
+      const response = await client.mutate({
+        mutation: SIGN_IN,
+        variables: {
+          email,
+          password
+        }
+      });
+      console.log(response);
+    } catch (error) {
+      console.dir(error.message);
+      errorMessage = error.message;
+      return;
+    }
+    resetInputs();
+    errorMessage = "";
   }
 </script>
 
 <style>
-  form {
-    border: 1px solid rgb(255, 62, 0);
+  .form-wrapper {
+    border: 2px solid rgb(255, 62, 0);
     padding: 1rem 1rem 2rem;
+    border-radius: 4px;
+  }
+  .form-wrapper.error {
+    border-color: red;
+  }
+  .form-wrapper.error input {
+    background: rgb(255, 168, 168);
   }
   label,
   button {
@@ -25,6 +70,7 @@
     display: block;
     line-height: 1.4;
     padding: 0.5rem;
+    border: 1px solid gray;
   }
   /* using a class because fieldsets don't support flexbox well */
   .input-field,
@@ -52,19 +98,23 @@
 </style>
 
 <section>
-  <h1>Log in to Sapper</h1>
-  <form on:submit|preventDefault={handleSubmit}>
-    <div class="input-field">
-
-      <label for="username">Username</label>
-      <input type="text" id="username" />
-    </div>
-    <div class="input-field">
-      <label for="password">Password</label>
-      <input type="password" id="password" />
-    </div>
-    <div class="button-group">
-      <button type="submit">Submit</button>
-    </div>
-  </form>
+  <div class="form-wrapper" class:error={errorMessage.length}>
+    <h1>Log in to Sapper</h1>
+    {#if errorMessage}
+      <div class="error">{errorMessage}</div>
+    {/if}
+    <form on:submit|preventDefault={handleSubmit}>
+      <div class="input-field">
+        <label type="email" for="email">Email address</label>
+        <input bind:value={email} type="text" id="email" />
+      </div>
+      <div class="input-field">
+        <label for="password">Password</label>
+        <input bind:value={password} type="password" id="password" />
+      </div>
+      <div class="button-group">
+        <button type="submit">Submit</button>
+      </div>
+    </form>
+  </div>
 </section>
