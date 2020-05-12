@@ -1,6 +1,59 @@
-<script>
+<script context="module">
   import gql from "graphql-tag";
   import { client } from "../utils/data.js";
+  const IS_AUTHENTICATED = gql`
+    query {
+      me {
+        id
+        avatar
+      }
+    }
+  `;
+
+  export async function preload() {
+    let me = null;
+    try {
+      const result = await client.query({
+        query: IS_AUTHENTICATED,
+        errorPolicy: "all"
+      });
+      me = result;
+    } catch (error) {
+      console.log("preload catch:");
+      console.log(error);
+    }
+    return {
+      me: me
+    };
+  }
+</script>
+
+<script>
+  import { onMount } from "svelte";
+  import { setClient, restore, query } from "svelte-apollo";
+  export let me;
+
+  // console.log("<script> $meQuery:", $meQuery);
+  let meQuery;
+  onMount(() => {
+    console.log({ me });
+    setClient(client);
+    meQuery = query(client, { query: IS_AUTHENTICATED });
+    // console.log("onMount $meQuery:", $meQuery);
+  });
+  $: {
+    try {
+      $meQuery;
+    } catch (error) {
+      console.log("reactive catch");
+      console.log(error);
+    }
+  }
+
+  if (!me.errors) {
+    restore(client, IS_AUTHENTICATED, me.data);
+  }
+
   let email = "user@svelte.dev";
   let password = "password";
   let errorMessage = "";
@@ -98,23 +151,27 @@
 </style>
 
 <section>
-  <div class="form-wrapper" class:error={errorMessage.length}>
-    <h1>Log in to Sapper</h1>
-    {#if errorMessage}
-      <div class="error">{errorMessage}</div>
-    {/if}
-    <form on:submit|preventDefault={handleSubmit}>
-      <div class="input-field">
-        <label type="email" for="email">Email address</label>
-        <input bind:value={email} type="text" id="email" />
-      </div>
-      <div class="input-field">
-        <label for="password">Password</label>
-        <input bind:value={password} type="password" id="password" />
-      </div>
-      <div class="button-group">
-        <button type="submit">Submit</button>
-      </div>
-    </form>
-  </div>
+  {#if !me || me.errors || !me.data || !me.data.me}
+    <div class="form-wrapper" class:error={errorMessage.length}>
+      <h1>Log in to Sapper</h1>
+      {#if errorMessage}
+        <div class="error">{errorMessage}</div>
+      {/if}
+      <form on:submit|preventDefault={handleSubmit}>
+        <div class="input-field">
+          <label type="email" for="email">Email address</label>
+          <input bind:value={email} type="text" id="email" />
+        </div>
+        <div class="input-field">
+          <label for="password">Password</label>
+          <input bind:value={password} type="password" id="password" />
+        </div>
+        <div class="button-group">
+          <button type="submit">Submit</button>
+        </div>
+      </form>
+    </div>
+  {:else}
+    <p>You are logged in!</p>
+  {/if}
 </section>

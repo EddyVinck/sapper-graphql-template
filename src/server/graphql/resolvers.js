@@ -6,12 +6,17 @@ import { createToken } from "../utils/auth";
 
 export const resolvers = {
   Query: {
-    me: (_root, _args, _ctx, _info) => {
-      // TODO: auth
+    borat: (_root, _args, _ctx, _info) => {
       return {
         email: "borat@email.gql",
         avatar: "great-success.png",
       };
+    },
+    me: (_, __, { user }) => {
+      console.log("🆗 in `me` resolver: ");
+      console.log({ user });
+      console.log({ id: user.id });
+      return { me: user };
     },
     user: async (_, { id }) => {
       return await User.findById(id).exec();
@@ -37,7 +42,7 @@ export const resolvers = {
     },
   },
   Mutation: {
-    signUp: async (_, { input }) => {
+    signUp: async (_, { input }, { req }) => {
       const isExistingUser = await User.findOne({ email: input.email })
         .lean()
         .exec();
@@ -47,11 +52,20 @@ export const resolvers = {
       const user = await User.create({
         ...input,
       });
-      const token = createToken(user.toObject());
-      const authUser = { token, user };
+      // TODO: extract to function since this is copied in signIn
+      const userObj = user.toObject();
+      const tokenData = { id: userObj.id, permissions: userObj.permissions };
+      const token = createToken(tokenData);
+      delete userObj.password;
+      const authUser = { token, user: userObj };
+      req.session.jwt = token;
+      console.log(req.session);
       return authUser;
     },
-    signIn: async (_, { input }) => {
+    signIn: async (_, { input }, { req, user: alreadySignedIn }) => {
+      if (alreadySignedIn) {
+        throw new AuthenticationError("You are already signed in!");
+      }
       const user = await User.findOne({ email: input.email }).exec();
       if (!user) {
         throw new AuthenticationError("Could not sign in.");
@@ -60,8 +74,13 @@ export const resolvers = {
       if (!correctPassword) {
         throw new AuthenticationError("Incorrect password.");
       }
-      const token = createToken(user.toObject());
-      const authUser = { token, user };
+      const userObj = user.toObject();
+      const tokenData = { id: userObj.id, permissions: userObj.permissions };
+      const token = createToken(tokenData);
+      delete userObj.password;
+      const authUser = { token, user: userObj };
+      req.session.jwt = token;
+      console.log(req.session);
       return authUser;
     },
     createPost: async (_, { input }, { user }) => {

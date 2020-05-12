@@ -22,8 +22,10 @@ const getUserFromToken = async (token) => {
   }
 };
 
-export const getUserFromReqHeaders = async (requestHeaders) => {
-  const token = requestHeaders.authorization || "";
+export const getUserFromReq = async (req) => {
+  console.log("running getUserFromReq");
+  const token = req.headers.authorization || req.session.jwt || "";
+  console.log({ token });
   const user = await getUserFromToken(token);
 
   return user;

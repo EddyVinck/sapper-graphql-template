@@ -4,7 +4,8 @@ export const typeDefs = gql`
   directive @signin on FIELD_DEFINITION
 
   type Query {
-    me: User!
+    borat: User! # example resolver for boilerplate
+    me: User @signin
     posts: [Post]!
     user(id: ID!): User!
     post(input: PostInput!): Post
