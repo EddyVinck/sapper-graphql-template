@@ -85,6 +85,7 @@
         }
       });
       console.log(response);
+      meQuery.refetch();
     } catch (error) {
       console.dir(error.message);
       errorMessage = error.message;
