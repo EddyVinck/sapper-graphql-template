@@ -1,12 +1,13 @@
 import { ApolloClient, InMemoryCache, HttpLink } from "apollo-boost";
-import nodeFetch from "node-fetch";
+import fetch from "cross-fetch";
 
 const cache = new InMemoryCache();
 const link = new HttpLink(
   // TODO: test which credentials: "include" I can remove
   {
     uri: "http://localhost:3000/graphql",
-    fetch: nodeFetch,
+    // TODO: Sapper provides this.fetch, maybe I can use it here too somehow
+    fetch: fetch,
     fetchOptions: {
       credentials: "include",
     },

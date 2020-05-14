@@ -14,9 +14,8 @@ export const resolvers = {
     },
     me: (_, __, { user }) => {
       console.log("🆗 in `me` resolver: ");
-      console.log({ user });
       console.log({ id: user.id });
-      return { me: user };
+      return user;
     },
     user: async (_, { id }) => {
       return await User.findById(id).exec();

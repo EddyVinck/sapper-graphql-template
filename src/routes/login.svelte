@@ -6,6 +6,7 @@
       me {
         id
         avatar
+        email
       }
     }
   `;
@@ -15,15 +16,18 @@
     try {
       const result = await client.query({
         query: IS_AUTHENTICATED,
-        errorPolicy: "all"
+        errorPolicy: "all",
+        fetchPolicy: "no-cache"
       });
       me = result;
     } catch (error) {
       console.log("preload catch:");
       console.log(error);
     }
+
+    console.log("preload done!");
     return {
-      me: me
+      preload: me
     };
   }
 </script>
@@ -31,28 +35,20 @@
 <script>
   import { onMount } from "svelte";
   import { setClient, restore, query } from "svelte-apollo";
-  export let me;
+  export let preload;
+  if (!preload.errors) {
+    restore(client, IS_AUTHENTICATED, preload.data);
+  }
 
   // console.log("<script> $meQuery:", $meQuery);
-  let meQuery;
+  let meQuery = query(client, { query: IS_AUTHENTICATED });
   onMount(() => {
-    console.log({ me });
     setClient(client);
-    meQuery = query(client, { query: IS_AUTHENTICATED });
+    meQuery.refetch();
+    console.log({ meQuery });
     // console.log("onMount $meQuery:", $meQuery);
   });
-  $: {
-    try {
-      $meQuery;
-    } catch (error) {
-      console.log("reactive catch");
-      console.log(error);
-    }
-  }
-
-  if (!me.errors) {
-    restore(client, IS_AUTHENTICATED, me.data);
-  }
+  $: console.log({ meq: $meQuery });
 
   let email = "user@svelte.dev";
   let password = "password";
@@ -152,7 +148,8 @@
 </style>
 
 <section>
-  {#if !me || me.errors || !me.data || !me.data.me}
+  <button on:click={() => meQuery.refetch()}>check logged in</button>
+  {#if !preload || preload.errors || !preload.data || !preload.data.me}
     <div class="form-wrapper" class:error={errorMessage.length}>
       <h1>Log in to Sapper</h1>
       {#if errorMessage}
@@ -173,6 +170,14 @@
       </form>
     </div>
   {:else}
+    {console.log(preload.data.me)}
     <p>You are logged in!</p>
   {/if}
+  {#await $meQuery}
+    <p>loading...</p>
+  {:then res}
+    <p>Response:</p>
+    <pre>{JSON.stringify(res, 0, 2)}</pre>
+  {/await}
+
 </section>

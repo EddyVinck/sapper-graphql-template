@@ -19,7 +19,7 @@ const SESSION_SECRET = config.get("sessionSecret");
 
 /**
  * ! currently working on:
- * Getting the cookies readable with SSR
+ * Getting the cookies readable with SSR first request
  */
 
 // TODO: learn if these settings are right for cors
@@ -94,7 +94,7 @@ const startServer = async () => {
       sirv("static", { dev: IS_DEV }),
       (req, res, next) => {
         if (req.session.jwt) {
-          console.log({ middlewareJwt: req.session.jwt });
+          console.log(req.session.jwt);
         }
         next();
       },
