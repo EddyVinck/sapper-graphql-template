@@ -19,7 +19,17 @@
         errorPolicy: "all",
         fetchPolicy: "no-cache"
       });
-      me = result;
+      let result2 = await this.fetch("/graphql", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ query: "{ me { id } }" })
+      });
+      result2 = await result2.json();
+      console.log({ thisFetch: result2.data });
+      me = result2;
     } catch (error) {
       console.log("preload catch:");
       console.log(error);
