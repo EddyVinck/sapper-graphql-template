@@ -1,6 +1,7 @@
 <script context="module">
   import gql from "graphql-tag";
-  import { client } from "../utils/data.js";
+  import { createClient } from "../utils/data.js";
+
   const IS_AUTHENTICATED = gql`
     query {
       me {
@@ -12,24 +13,15 @@
   `;
 
   export async function preload() {
+    const client = createClient(this.fetch);
     let me = null;
     try {
       const result = await client.query({
         query: IS_AUTHENTICATED,
-        errorPolicy: "all",
+        errorPolicy: "all", // without this the SSR will error
         fetchPolicy: "no-cache"
       });
-      let result2 = await this.fetch("/graphql", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ query: "{ me { id } }" })
-      });
-      result2 = await result2.json();
-      console.log({ thisFetch: result2.data });
-      me = result2;
+      me = result;
     } catch (error) {
       console.log("preload catch:");
       console.log(error);
@@ -45,7 +37,10 @@
 <script>
   import { onMount } from "svelte";
   import { setClient, restore, query } from "svelte-apollo";
+  import { client } from "../utils/data.js";
   export let preload;
+  let loggedIn = false;
+
   if (!preload.errors) {
     restore(client, IS_AUTHENTICATED, preload.data);
   }
@@ -83,6 +78,7 @@
 
   async function handleSubmit(e) {
     try {
+      console.log("submitting");
       const response = await client.mutate({
         mutation: SIGN_IN,
         variables: {
@@ -90,8 +86,9 @@
           password
         }
       });
-      console.log(response);
-      meQuery.refetch();
+      console.log("refetching...");
+      meQuery = query(client, { query: IS_AUTHENTICATED });
+      console.log("refetching done!");
     } catch (error) {
       console.dir(error.message);
       errorMessage = error.message;
@@ -99,6 +96,10 @@
     }
     resetInputs();
     errorMessage = "";
+  }
+
+  async function logout() {
+    // TODO
   }
 </script>
 
@@ -159,7 +160,35 @@
 
 <section>
   <button on:click={() => meQuery.refetch()}>check logged in</button>
-  {#if !preload || preload.errors || !preload.data || !preload.data.me}
+
+  {#await $meQuery}
+    <p>loading...</p>
+  {:then res}
+    {#if !res || res.errors || !res.data || !res.data.me}
+      <div class="form-wrapper" class:error={errorMessage.length}>
+        <h1>Log in to Sapper</h1>
+        {#if errorMessage}
+          <div class="error">{errorMessage}</div>
+        {/if}
+        <form on:submit|preventDefault={handleSubmit}>
+          <div class="input-field">
+            <label type="email" for="email">Email address</label>
+            <input bind:value={email} type="text" id="email" />
+          </div>
+          <div class="input-field">
+            <label for="password">Password</label>
+            <input bind:value={password} type="password" id="password" />
+          </div>
+          <div class="button-group">
+            <button type="submit">Submit</button>
+          </div>
+        </form>
+      </div>
+    {:else}
+      <p>You are logged in</p>
+      <button on:click={logout}>Log out</button>
+    {/if}
+  {:catch}
     <div class="form-wrapper" class:error={errorMessage.length}>
       <h1>Log in to Sapper</h1>
       {#if errorMessage}
@@ -179,15 +208,6 @@
         </div>
       </form>
     </div>
-  {:else}
-    {console.log(preload.data.me)}
-    <p>You are logged in!</p>
-  {/if}
-  {#await $meQuery}
-    <p>loading...</p>
-  {:then res}
-    <p>Response:</p>
-    <pre>{JSON.stringify(res, 0, 2)}</pre>
   {/await}
 
 </section>
