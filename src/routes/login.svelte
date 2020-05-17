@@ -1,6 +1,7 @@
-<script context="module">
+<script>
+  import { onMount } from "svelte";
+  import { initClient, query } from "@urql/svelte";
   import gql from "graphql-tag";
-  import { createClient } from "../utils/data.js";
 
   const IS_AUTHENTICATED = gql`
     query {
@@ -11,49 +12,12 @@
       }
     }
   `;
-
-  export async function preload() {
-    const client = createClient(this.fetch);
-    let me = null;
-    try {
-      const result = await client.query({
-        query: IS_AUTHENTICATED,
-        errorPolicy: "all", // without this the SSR will error
-        fetchPolicy: "no-cache"
-      });
-      me = result;
-    } catch (error) {
-      console.log("preload catch:");
-      console.log(error);
-    }
-
-    console.log("preload done!");
-    return {
-      preload: me
-    };
-  }
-</script>
-
-<script>
-  import { onMount } from "svelte";
-  import { setClient, restore, query } from "svelte-apollo";
-  import { client } from "../utils/data.js";
-  export let preload;
+  let client = null;
   let loggedIn = false;
 
-  if (!preload.errors) {
-    restore(client, IS_AUTHENTICATED, preload.data);
-  }
-
-  // console.log("<script> $meQuery:", $meQuery);
-  let meQuery = query(client, { query: IS_AUTHENTICATED });
-  onMount(() => {
-    setClient(client);
-    meQuery.refetch();
-    console.log({ meQuery });
-    // console.log("onMount $meQuery:", $meQuery);
-  });
-  $: console.log({ meq: $meQuery });
+  initClient({ url: "/graphql" });
+  onMount(() => {});
+  $: authenticated = query({ query: IS_AUTHENTICATED });
 
   let email = "user@svelte.dev";
   let password = "password";
@@ -78,24 +42,24 @@
 
   async function handleSubmit(e) {
     try {
-      console.log("submitting");
-      const response = await client.mutate({
-        mutation: SIGN_IN,
-        variables: {
-          email,
-          password
-        }
-      });
-      console.log("refetching...");
-      meQuery = query(client, { query: IS_AUTHENTICATED });
-      console.log("refetching done!");
+      // console.log("submitting");
+      // const response = await client.mutate({
+      //   mutation: SIGN_IN,
+      //   variables: {
+      //     email,
+      //     password
+      //   }
+      // });
+      // console.log("refetching...");
+      // meQuery = query(client, { query: IS_AUTHENTICATED });
+      // console.log("refetching done!");
     } catch (error) {
       console.dir(error.message);
-      errorMessage = error.message;
+      // errorMessage = error.message;
       return;
     }
     resetInputs();
-    errorMessage = "";
+    // errorMessage = "";
   }
 
   async function logout() {
@@ -159,9 +123,13 @@
 </style>
 
 <section>
-  <button on:click={() => meQuery.refetch()}>check logged in</button>
+  <!-- <button on:click={() => meQuery.refetch()}>check logged in</button> -->
 
-  {#await $meQuery}
+  {#if $authenticated.fetching}
+    loading...
+  {:else if $authenticated.error}oh no ${$authenticated.error.message}{/if}
+
+  <!-- {#await $meQuery}
     <p>loading...</p>
   {:then res}
     {#if !res || res.errors || !res.data || !res.data.me}
@@ -208,6 +176,6 @@
         </div>
       </form>
     </div>
-  {/await}
+  {/await} -->
 
 </section>
