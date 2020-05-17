@@ -3,9 +3,9 @@
   import { client } from "../utils/data.js";
   import gql from "graphql-tag";
 
-  const ME = gql`
+  const BORAT = gql`
     query {
-      me {
+      borat {
         email
         avatar
       }
@@ -15,7 +15,7 @@
   export async function preload() {
     return {
       cache: await client.query({
-        query: ME
+        query: BORAT
       })
     };
   }
@@ -25,9 +25,9 @@
   import { onMount } from "svelte";
   import { setClient, restore, query } from "svelte-apollo";
   export let cache; // this matches the return value of `preload` above
-  restore(client, ME, cache.data);
+  restore(client, BORAT, cache.data);
 
-  let meQuery = query(client, { query: ME });
+  let meQuery = query(client, { query: BORAT });
 
   // You have access to the query result in the script like this (with the $):
   // console.log("<script> $meQuery:", $meQuery);
@@ -37,7 +37,7 @@
   });
 
   $: image =
-    meQuery && meQuery.data && meQuery.data.me && meQuery.data.me.avatar;
+    meQuery && meQuery.data && meQuery.data.borat && meQuery.data.borat.avatar;
   $: loading = meQuery.loading;
   $: text = loading ? "Loading..." : "Great success!";
   $: altText = loading ? "Loading Borat..." : "Borat";
@@ -108,7 +108,7 @@
 {:then result}
   <figure>
     <figcaption>HIGH FIVE!</figcaption>
-    <img alt="Borat!" src={result.data.me.avatar} />
+    <img alt="Borat!" src={result.data.borat.avatar} />
   </figure>
   <p>GraphQL response:</p>
   <div class="pre-wrapper">

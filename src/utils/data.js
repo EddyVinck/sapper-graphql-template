@@ -1,11 +1,30 @@
 import { ApolloClient, InMemoryCache, HttpLink } from "apollo-boost";
-import nodeFetch from "node-fetch";
+import fetch from "cross-fetch";
+
 const cache = new InMemoryCache();
-const link = new HttpLink({
-  uri: "http://localhost:3000/graphql",
-  fetch: nodeFetch,
-});
-export const client = new ApolloClient({
-  cache,
-  link,
-});
+
+// Sapper provides this.fetch in the preloada functions for server-side rendering. It is useful to be able to pass that in.
+export function createClient(fetch) {
+  const link = new HttpLink(
+    // TODO: test which credentials: "include" I can remove
+    {
+      uri: "http://localhost:3000/graphql",
+      fetch: fetch,
+      fetchOptions: {
+        credentials: "include",
+      },
+      credentials: "include",
+    }
+  );
+  return new ApolloClient({
+    cache,
+    link,
+    onError: ({ networkError, graphQLErrors }) => {
+      console.log("graphQLErrors", graphQLErrors);
+      console.log("networkError", networkError);
+    },
+    credentials: "include",
+  });
+}
+
+export const client = createClient(fetch);

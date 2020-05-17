@@ -22,9 +22,11 @@ const getUserFromToken = async (token) => {
   }
 };
 
-export const getUserFromReqHeaders = async (requestHeaders) => {
-  const token = requestHeaders.authorization || "";
-  const user = await getUserFromToken(token);
+export const getUserFromReq = async (req) => {
+  console.log("running getUserFromReq");
+  const jwtToken = req.headers.authorization || req.session.jwt || "";
+  console.log({ token: jwtToken });
+  const user = await getUserFromToken(jwtToken);
 
   return user;
 };
